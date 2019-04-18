@@ -31,24 +31,19 @@ public:
 	{
 		return missile;
 	}
-	bool isAHIT(FloatRect enemyBounds, int &aliensHit)
+	bool isAHIT(FloatRect enemyBounds)
 	{
 		FloatRect missileBounds = missile.getGlobalBounds();
-		bool hasNotHitYet = true;
+		bool hasHit;
 
 		if (missileBounds.intersects(enemyBounds))
 		{
-			if (hasNotHitYet)
-			{
-				aliensHit++;
-				hasNotHitYet = false;
-			}
+			hasHit = true;
 		}
 		else
-		{
-			hasNotHitYet = true;
-		}
-		return hasNotHitYet;
+			hasHit = false;
+
+		return hasHit;
 	}
 	bool isOffscreen()
 	{

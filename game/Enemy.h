@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <list>
+#include "Missile.h"
 using namespace std;
 #include <SFML/Graphics.hpp>
 using namespace sf;
@@ -8,6 +10,7 @@ class Enemy
 {
 private:
 	Sprite enemy;
+	float distance;		// holds how fast the enemy goes
 public:
 	Enemy(Vector2f pos, Texture &texture)
 	{
@@ -16,6 +19,17 @@ public:
 		enemy.setScale(.75, .75);
 
 		enemy.setPosition(pos);
+
+		distance = 0.2f;
+	}
+	void setDifferentPosition(Vector2f pos)
+	{
+		// really only changes the y value of position
+		enemy.setPosition(pos);
+	}
+	void setMovingDistance(float d)
+	{
+		distance = d;
 	}
 	void drawEnemy(RenderWindow &win)
 	{
@@ -23,19 +37,62 @@ public:
 	}
 	void moveEnemy()
 	{
-		const float DISTANCE = 0.2f;
-		enemy.move(0, DISTANCE);
+		enemy.move(0, distance);
 	}
 	Sprite returnEnemySprite()
 	{
 		return enemy;
 	}
+	float getXPosition() const
+	{
+		return enemy.getPosition().x;
+	}
 	Vector2f returnPosition() const
 	{
 		return enemy.getPosition();
 	}
-	FloatRect returnGlobalBounds() const
+	bool offScreen()
 	{
-		return enemy.getGlobalBounds();
+		bool offScreen = false;
+		Vector2f pos = enemy.getPosition();
+		if (pos.y > 600)
+		{
+			offScreen = true;
+		}
+		return offScreen;
+	}
+	bool isEnemyHit(list<Missile> &manyMissiles)
+	{
+		bool enemyIsHit = false;
+		list<Missile>::iterator tempMissile;
+		for (tempMissile = manyMissiles.begin(); tempMissile != manyMissiles.end() && !enemyIsHit;)
+		{
+			if (tempMissile->isAHIT(enemy.getGlobalBounds()))
+			{
+				tempMissile = manyMissiles.erase(tempMissile);
+				cout << "A missile hit an enemy." << endl;
+				enemyIsHit = true;
+			}
+			else
+			{
+				tempMissile++;
+			}
+		}
+		return enemyIsHit;
+	}
+	bool reachedShip(FloatRect shipBounds)
+	{
+		FloatRect enemyBounds = enemy.getGlobalBounds();
+		bool hasHit;
+
+		if (enemyBounds.intersects(shipBounds))
+		{
+			hasHit = true;
+		}
+		else
+		{
+			hasHit = false;
+		}
+		return hasHit;
 	}
 };

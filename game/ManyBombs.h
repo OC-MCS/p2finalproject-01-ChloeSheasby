@@ -9,7 +9,7 @@ using namespace sf;
 class ManyBombs
 {
 private:
-	list<Bomb> many;
+	list<Bomb> manyBombs;
 	Texture bombTexture;
 public:
 	ManyBombs()
@@ -20,41 +20,54 @@ public:
 			exit(EXIT_FAILURE);
 		}
 	}
-	void randomAlienDrop(Sprite randomEnemy)		// this also adds a bomb to the list
+	void randomAlienDrop(Vector2f pos)		// this adds a bomb to the list
 	{
-		Vector2f pos = randomEnemy.getPosition();
 		Bomb temp(bombTexture);
 		temp.setPositionByEnemy(Vector2f(pos.x + 5, pos.y - 5));
-		many.push_back(temp);
+		manyBombs.push_back(temp);
+		cout << "a bomb is being added" << endl;
 	}
-	void deleteBomb(Sprite ship, int &livesLost)	// should this instead be that if a bomb hits the ship, 
-													// the level resets, so the bomb gets deleted anyway?
+	void resetScale(float x, float y)
 	{
-		list<Bomb>::iterator temp;
-		temp = many.begin();
-		FloatRect shipBounds = ship.getGlobalBounds();
-		while (temp != many.end())
+		list<Bomb>::iterator tempBomb;
+		for (tempBomb = manyBombs.begin(); tempBomb != manyBombs.end(); tempBomb++)
 		{
-			if (temp->hitShip(shipBounds, livesLost))
+			tempBomb->setScale(x, y);
+		}
+	}
+	bool deleteBomb(Sprite ship, int &livesLeft)
+	{
+		list<Bomb>::iterator tempBomb;
+		FloatRect shipBounds = ship.getGlobalBounds();
+		bool shipIsHit = false;
+
+		for (tempBomb = manyBombs.begin(); tempBomb != manyBombs.end() && !shipIsHit;)
+		{
+			if (tempBomb->hitShip(shipBounds))
 			{
-				temp = many.erase(temp);
+				tempBomb = manyBombs.erase(tempBomb);
+				shipIsHit = true;
+				livesLeft--;
 			}
 			else
 			{
-				temp++;
+				tempBomb++;
 			}
 		}
+		return shipIsHit;
 	}
 	void moveBombs()
 	{
 		list<Bomb>::iterator temp;
-		temp = many.begin();
-		while (temp != many.end())
+		bool bombBelowScreen = false;
+		for (temp = manyBombs.begin(); temp != manyBombs.end() && !bombBelowScreen;)
+			// I think this kicks out of the loop as soon as a bomb leaves the screen
 		{
 			temp->moveBomb();
 			if (temp->belowScreen())
 			{
-				temp = many.erase(temp);
+				temp = manyBombs.erase(temp);
+				bombBelowScreen = true;
 			}
 			else
 			{
@@ -65,7 +78,7 @@ public:
 	void drawBombs(RenderWindow &win)
 	{
 		list<Bomb>::iterator temp;
-		for (temp = many.begin(); temp != many.end(); temp++)
+		for (temp = manyBombs.begin(); temp != manyBombs.end(); temp++)
 		{
 			win.draw(temp->returnBombSprite());
 		}

@@ -9,10 +9,10 @@
 #include "Enemy.h"
 #include "Army.h"
 #include "Missile.h"
+#include "ManyMissiles.h"
 #include "Bomb.h"
 #include "ManyBombs.h"
 #include "UI.h"
-#include "ManyMissiles.h"
 using namespace std;
 #include <SFML/Graphics.hpp>
 using namespace sf; 
@@ -34,6 +34,11 @@ int main()
 {
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
+	const int MIN_SECONDS = 60;
+	const int MAX_SECONDS = 300;
+
+	unsigned seed = time(0);
+	srand(seed);
 
 	RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Space Invaders");
 	// Limit the framerate to 60 frames per second
@@ -62,18 +67,10 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-
 	Ship ship(Vector2f(shipX, shipY));
-	//Enemy enemy(Vector2f(100, 40), enemyTexture);
 	Army army(Vector2f(100, 40));
 	UI title;
-	//Missile missile(missileTexture);
 	ManyMissiles manyMissiles;
-
-	//Bomb bomb(bombTexture);
-	//Vector2f pos = enemy.returnPosition();
-	//bomb.setPositionByEnemy(Vector2f(pos.x + 5, pos.y - 5));
-
 	ManyBombs manyBombs;
 
 
@@ -81,6 +78,12 @@ int main()
 	int aliensHit = 0;		// how many aliens hit
 	int livesLeft = 3;		// sets the initial amount of lives for the player
 	bool aliensWon = false;
+	bool levelTwo = false;
+	bool mouseClicked = false;
+	string level = "LEVEL ONE";
+	int randomSecond;
+	randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
+
 
 	while (window.isOpen())
 	{
@@ -107,6 +110,11 @@ int main()
 					cout << "Adding a missile to the missile group." << endl;
 				}
 			}
+			else if (event.type == Event::MouseButtonReleased)
+			{
+				mouseClicked = true;
+			}
+
 		}
 
 	//===========================================================
@@ -118,52 +126,67 @@ int main()
 		if (!start)
 		{
 			title.drawTitlePage(window);
-			if (event.type == Event::MouseButtonReleased)
+
+			if (mouseClicked)
 			{
-				// maybe they just clicked on one of the settings "buttons"
-				// check for this and handle it.
 				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
-				start = title.handleMouseClicked(mousePos);
+
+				start = title.handleStartClicked(mousePos);
 				// should change start to true if the start button is clicked
 				if (!start)
 				{
 					exit(-1);
 				}
+
+				mouseClicked = false;
 			}
 		}
 		else
 		{
-			title.drawLabels(window, livesLeft, aliensHit);
+			if (levelTwo)
+			{
+				level = "LEVEL TWO";
+				army.setSpeed(0.75f);
+				manyBombs.resetScale(1, 1);
+				ship.resetPosition(Vector2f(shipX, shipY));
+				//army.resetArmy(Vector2f(100, 40));
+				levelTwo = false;
+			}
+
+			title.drawLabels(window, livesLeft, aliensHit, level);
 			ship.moveShip();
 	
-			// draw the ship on top of background 
-			// (the ship from previous frame was erased when we drew background)
 			ship.drawShip(window);
-	
-			//enemy.drawEnemy(window);
-	
-			//bomb.drawBomb(window);
-			//bomb.moveBomb();
-	
-			army.moveArmy();
+
+			if (manyBombs.deleteBomb(ship.returnShipSprite(), livesLeft)
+				|| army.hasArmyReachedEnemy(ship.returnShipSprite(), livesLeft) || army.moveArmy(livesLeft))
+				// delete bomb returns true if the ship is hit once
+			{
+				// restart the level && move enemies to the top of the screen again
+				army.resetPosition(40);
+				// reset ship's position
+				ship.resetPosition(Vector2f(shipX, shipY));
+			}
+		
 			army.drawArmy(window);
 	
-			// this should only happen every 1 to 5 seconds 
-			// not sure how to do that yet
-			//manyBombs.randomAlienDrop(army.returnRandomEnemy());
-			//manyBombs.moveBombs();
-			//manyBombs.drawBombs(window);
-	
-			//missile.drawMissile(window);
-			//missile.moveMissile();
-	
+			// this drops a bomb every 1 to 5 seconds 
+			if (randomSecond == 0)
+			{
+				manyBombs.randomAlienDrop(army.returnRandomEnemyPosition());
+				randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
+			}
+			else
+			{
+				randomSecond--;
+			}
+
+			manyBombs.moveBombs();
+			manyBombs.drawBombs(window);
+		
 			manyMissiles.moveMissiles();
 			manyMissiles.drawManyMissiles(window);
-			manyMissiles.deleteMissile(army.returnArmyList(), aliensHit);
-
-			// this function makes the program crash as soon as the spacebar is pressed
-	
-			//manyBombs.deleteBomb(ship.returnShipSprite(), livesLost);
+			manyMissiles.deleteMissileAndEnemy(army.returnArmyList(), aliensHit);
 		}
 
 		if (manyBombs.isShipDead(livesLeft))
@@ -178,7 +201,8 @@ int main()
 		{
 			aliensWon = false;
 			title.drawEndOfLevel(window, aliensWon);
-			start = false;	// redraws the starting page
+			start = false;
+			levelTwo = true;
 			// the next level should start
 		}
 

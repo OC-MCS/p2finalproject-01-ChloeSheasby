@@ -9,7 +9,7 @@ class UI
 private:
 	Sprite background;
 	Texture starsTexture;
-	RectangleShape startBtn, quitBtn;
+	RectangleShape startBtn, quitBtn; // continueBtn;
 	Font font;
 public:
 	UI()
@@ -38,7 +38,7 @@ public:
 		quitBtn.setSize(Vector2f(75, 30));
 		quitBtn.setFillColor(Color::Transparent);
 	}
-	bool handleMouseClicked(Vector2f mouse)
+	bool handleStartClicked(Vector2f mouse)
 	{
 		bool start = false;
 		if (startBtn.getGlobalBounds().contains(mouse))
@@ -75,7 +75,7 @@ public:
 		quitColor.setFillColor(Color::White);
 		win.draw(quitColor);
 	}
-	void drawLabels(RenderWindow &win, int &livesLeft, int &aliensHit)
+	void drawLabels(RenderWindow &win, int &livesLeft, int &aliensHit, string level)
 	{
 		string numLives = to_string(livesLeft);
 		string numAliens = to_string(aliensHit);
@@ -99,6 +99,11 @@ public:
 		numberOfAliens.setPosition(90, 32);
 		numberOfAliens.setFillColor(Color::White);
 		win.draw(numberOfAliens);
+
+		Text displayLevel(level , font, 18);
+		displayLevel.setPosition(350, 15);
+		displayLevel.setFillColor(Color::Yellow);
+		win.draw(displayLevel);
 	}
 	void drawEndOfLevel(RenderWindow &win, bool aliensWon)
 	{

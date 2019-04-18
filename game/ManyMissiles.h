@@ -9,7 +9,7 @@ using namespace sf;
 class ManyMissiles		
 {
 private:
-	list<Missile> many;	// creates a list of missile
+	list<Missile> manyMissiles;	// creates a list of missile
 	Texture missileTexture;
 public:
 	ManyMissiles()
@@ -24,44 +24,39 @@ public:
 	{
 		Missile temp(missileTexture);
 		temp.setPositionByShip(pos);
-		many.push_back(temp);
+		manyMissiles.push_back(temp);
 	}
-	void deleteMissile(list<Enemy> &army, int &aliensHit)	// delete once the missile is a hit
+	void deleteMissileAndEnemy(list<Enemy> &army, int &aliensHit)	// delete once the missile is a hit
 	{
 		bool alienIsHit = false;
-		list<Missile>::iterator temp;
-		temp = many.begin();
 		list<Enemy>::iterator armyTemp;
-		while (temp != many.end())
+		
+		for (armyTemp = army.begin(); armyTemp != army.end() && !alienIsHit;)
 		{
-			for (armyTemp = army.begin(); armyTemp != army.end() && !alienIsHit; armyTemp++)
+			if (armyTemp->isEnemyHit(manyMissiles))
 			{
-				if (temp->isAHIT(armyTemp->returnGlobalBounds(), aliensHit))
-				{
-					temp = many.erase(temp);
-					cout << "A missile hit an enemy." << endl;
-					//armyTemp = army.erase(armyTemp);	// can I do this to handle deleting the aliens too?
-					alienIsHit = true;
-				}
-				else
-				{
-					// this is where it is breaking
-					temp++;
-				}
+				armyTemp = army.erase(armyTemp);
+				alienIsHit = true;
+				aliensHit++;
+			}
+			else
+			{
+				armyTemp++;
 			}
 		}
 	}
 	void moveMissiles()
 	{
 		list<Missile>::iterator temp;
-		temp = many.begin();
-		while (temp != many.end())
+		bool missileOffScreen = false;
+		for (temp = manyMissiles.begin(); temp != manyMissiles.end() && !missileOffScreen;)
 		{
 			temp->moveMissile();
 			if (temp->isOffscreen())
 			{
-				temp = many.erase(temp);	// erases if missile is offscreen
+				temp = manyMissiles.erase(temp);	// erases if missile is offscreen
 				cout << "Missile went off screen." << endl;
+				missileOffScreen = true;
 			}
 			else
 			{
@@ -72,7 +67,7 @@ public:
 	void drawManyMissiles(RenderWindow &win)
 	{
 		list<Missile>::iterator temp;
-		for (temp = many.begin(); temp != many.end(); temp++)
+		for (temp = manyMissiles.begin(); temp != manyMissiles.end(); temp++)
 		{
 			win.draw(temp->returnMissileSprite());
 		}
@@ -80,7 +75,7 @@ public:
 	bool areAllAliensDead(int count)
 	{
 		bool areAllAliensDead = false;
-		if (count == 10)
+		if (count == 12)
 		{
 			areAllAliensDead = true;
 		}

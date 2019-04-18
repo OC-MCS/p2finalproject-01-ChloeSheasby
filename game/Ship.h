@@ -41,6 +41,10 @@ public:
 	{
 		win.draw(ship);
 	}
+	void resetPosition(Vector2f pos)
+	{
+		ship.setPosition(pos);
+	}
 	Vector2f returnPosition() const
 	{
 		return ship.getPosition();

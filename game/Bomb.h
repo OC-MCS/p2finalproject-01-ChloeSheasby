@@ -18,6 +18,10 @@ public:
 	{
 		bomb.setPosition(pos);
 	}
+	void setScale(float x, float y)
+	{
+		bomb.setScale(x, y);
+	}
 	void moveBomb()
 	{
 		const float DISTANCE = 5.0f;
@@ -31,24 +35,20 @@ public:
 	{
 		return bomb;
 	}
-	bool hitShip(FloatRect shipBounds, int &livesLeft)
+	bool hitShip(FloatRect shipBounds)
 	{
 		FloatRect bombBounds = bomb.getGlobalBounds();
-		bool hasNotHitYet = true;
+		bool hasHit;
 
 		if (bombBounds.intersects(shipBounds))
 		{
-			if (hasNotHitYet)
-			{
-				livesLeft--;
-				hasNotHitYet = false;
-			}
-			else
-			{
-				hasNotHitYet = true;
-			}
+			hasHit = true;
 		}
-		return hasNotHitYet;
+		else
+		{
+			hasHit = false;
+		}
+		return hasHit;
 	}
 	bool belowScreen()
 	{
