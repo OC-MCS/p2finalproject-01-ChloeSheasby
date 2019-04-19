@@ -14,6 +14,10 @@ public:
 		bomb.setTexture(texture);
 		bomb.setScale(.5, .5);
 	}
+	void setDifferentTexture(Texture &texture)
+	{
+		bomb.setTexture(texture);
+	}
 	void setPositionByEnemy(Vector2f pos)
 	{
 		bomb.setPosition(pos);

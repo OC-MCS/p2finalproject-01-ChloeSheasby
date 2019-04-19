@@ -11,6 +11,7 @@ class ManyMissiles
 private:
 	list<Missile> manyMissiles;	// creates a list of missile
 	Texture missileTexture;
+	Texture moneyTexture;
 public:
 	ManyMissiles()
 	{
@@ -19,14 +20,24 @@ public:
 			cout << "Unable to load missile texture!" << endl;
 			exit(EXIT_FAILURE);
 		}
+		if (!moneyTexture.loadFromFile("money.bmp"))
+		{
+			cout << "Unable to load money texture!" << endl;
+			exit(EXIT_FAILURE);
+		}
 	}
-	void addMissileToGroup(Vector2f pos)	// this simply adds a missile to the group of missiles
+	void addMissileToGroup(Vector2f pos, int level)	// this simply adds a missile to the group of missiles
 	{
 		Missile temp(missileTexture);
+		if (level == 2)
+		{
+			temp.setDifferentScale(3, 3);
+			temp.setDifferentTexture(moneyTexture);
+		}
 		temp.setPositionByShip(pos);
 		manyMissiles.push_back(temp);
 	}
-	void deleteMissileAndEnemy(list<Enemy> &army, int &aliensHit)	// delete once the missile is a hit
+	void deleteMissileAndEnemy(list<Enemy> &army)	// delete once the missile is a hit
 	{
 		bool alienIsHit = false;
 		list<Enemy>::iterator armyTemp;
@@ -37,7 +48,6 @@ public:
 			{
 				armyTemp = army.erase(armyTemp);
 				alienIsHit = true;
-				aliensHit++;
 			}
 			else
 			{
@@ -84,5 +94,9 @@ public:
 			areAllAliensDead = false;
 		}
 		return areAllAliensDead;
+	}
+	void clearMissileList()
+	{
+		manyMissiles.clear();
 	}
 };

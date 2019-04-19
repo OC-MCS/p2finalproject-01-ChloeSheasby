@@ -63,5 +63,17 @@
     <Image Include="bomb.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="BadderEnemy.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="OC.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="loans.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="money.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

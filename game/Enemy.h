@@ -22,6 +22,10 @@ public:
 
 		distance = 0.2f;
 	}
+	void setDifferentTexture(Texture &texture)
+	{
+		enemy.setTexture(texture);
+	}
 	void setDifferentPosition(Vector2f pos)
 	{
 		// really only changes the y value of position
@@ -80,12 +84,11 @@ public:
 		}
 		return enemyIsHit;
 	}
-	bool reachedShip(FloatRect shipBounds)
+	bool reachedShip(Vector2f shipPos)
 	{
-		FloatRect enemyBounds = enemy.getGlobalBounds();
 		bool hasHit;
 
-		if (enemyBounds.intersects(shipBounds))
+		if (enemy.getPosition().y > shipPos.y)
 		{
 			hasHit = true;
 		}

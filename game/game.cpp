@@ -32,18 +32,20 @@ using namespace sf;
 
 int main()
 {
-	const int WINDOW_WIDTH = 800;
+	const int WINDOW_WIDTH = 800;		// the size of the window
 	const int WINDOW_HEIGHT = 600;
-	const int MIN_SECONDS = 60;
+	const int MIN_SECONDS = 60;			// helps with making a bomb drop randomly
 	const int MAX_SECONDS = 300;
 
-	unsigned seed = time(0);
+	unsigned seed = time(0);			// also helps with making a bomb drop randomly
 	srand(seed);
 
+	// initializes the window
 	RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Space Invaders");
 	// Limit the framerate to 60 frames per second
 	window.setFramerateLimit(60);
 
+	// gets the coordinates for the middle bottom of the screen that will be used to initialize ship
 	float shipX = window.getSize().x / 2.0f;
 	float shipY = 500;
 
@@ -75,14 +77,11 @@ int main()
 
 
 	bool start = false;
-	int aliensHit = 0;		// how many aliens hit
 	int livesLeft = 3;		// sets the initial amount of lives for the player
 	bool aliensWon = false;
-	bool levelTwo = false;
 	bool mouseClicked = false;
-	string level = "LEVEL ONE";
-	int randomSecond;
-	randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
+	Level level = LEVEL_ONE;
+	int randomSecond = 0;
 
 
 	while (window.isOpen())
@@ -106,15 +105,26 @@ int main()
 				{
 					Vector2f pos = ship.returnPosition();
 					//missile.setPositionByShip(Vector2f(pos.x + 5, pos.y - 5));
-					manyMissiles.addMissileToGroup(Vector2f(pos.x + 5, pos.y - 5));
+					manyMissiles.addMissileToGroup(Vector2f(pos.x + 5, pos.y - 5), level);
 					cout << "Adding a missile to the missile group." << endl;
 				}
 			}
 			else if (event.type == Event::MouseButtonReleased)
 			{
-				mouseClicked = true;
+				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
+				if (level != END)
+				{
+					start = title.handleStartClicked(mousePos);
+				}
+				else
+				{
+					start = false;
+				}
+				if (!start)
+				{
+					exit(-1);
+				}
 			}
-
 		}
 
 	//===========================================================
@@ -125,35 +135,22 @@ int main()
 
 		if (!start)
 		{
-			title.drawTitlePage(window);
-
-			if (mouseClicked)
+			if (level == END)
 			{
-				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
-
-				start = title.handleStartClicked(mousePos);
-				// should change start to true if the start button is clicked
-				if (!start)
+				title.drawEndOfGame(window, aliensWon);
+			}
+			else
+			{
+				title.drawTitlePage(window, level);
+				if (level == LEVEL_TWO || level == LEVEL_THREE)
 				{
-					exit(-1);
+					title.drawEndOfLevel(window);
 				}
-
-				mouseClicked = false;
 			}
 		}
 		else
 		{
-			if (levelTwo)
-			{
-				level = "LEVEL TWO";
-				army.setSpeed(0.75f);
-				manyBombs.resetScale(1, 1);
-				ship.resetPosition(Vector2f(shipX, shipY));
-				//army.resetArmy(Vector2f(100, 40));
-				levelTwo = false;
-			}
-
-			title.drawLabels(window, livesLeft, aliensHit, level);
+			title.drawLabels(window, livesLeft, army.returnEnemiesHit(), level);
 			ship.moveShip();
 	
 			ship.drawShip(window);
@@ -173,8 +170,15 @@ int main()
 			// this drops a bomb every 1 to 5 seconds 
 			if (randomSecond == 0)
 			{
-				manyBombs.randomAlienDrop(army.returnRandomEnemyPosition());
-				randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
+				manyBombs.randomAlienDrop(army.returnRandomEnemyPosition(), level);
+				if (level == LEVEL_THREE)
+				{
+					randomSecond = (rand() % 5) + 1;
+				}
+				else
+				{
+					randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
+				}
 			}
 			else
 			{
@@ -186,23 +190,39 @@ int main()
 		
 			manyMissiles.moveMissiles();
 			manyMissiles.drawManyMissiles(window);
-			manyMissiles.deleteMissileAndEnemy(army.returnArmyList(), aliensHit);
+			manyMissiles.deleteMissileAndEnemy(army.returnArmyList()); 
 		}
 
 		if (manyBombs.isShipDead(livesLeft))
 		{
 			aliensWon = true;
-			title.drawEndOfLevel(window, aliensWon);
 			start = false;	// redraws the starting page
+			livesLeft = 3;
+			level = END;
 			// if just one bomb hits the ship, the level needs to start over
 		}
 
-		if (manyMissiles.areAllAliensDead(aliensHit))
+		if (manyMissiles.areAllAliensDead(army.returnEnemiesHit()))
 		{
 			aliensWon = false;
-			title.drawEndOfLevel(window, aliensWon);
+			if (level == LEVEL_ONE)
+			{
+				level = LEVEL_TWO;
+			}
+			else if (level == LEVEL_TWO)
+			{
+				level = LEVEL_THREE;
+			}
+			else if (level == LEVEL_THREE)
+			{
+				level = END;
+			}
 			start = false;
-			levelTwo = true;
+
+			army.setNewLevel(level);
+			manyBombs.clearBombList();
+			manyMissiles.clearMissileList();
+			ship.resetPosition(Vector2f(shipX, shipY));
 			// the next level should start
 		}
 

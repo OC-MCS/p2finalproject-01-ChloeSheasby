@@ -4,6 +4,8 @@ using namespace std;
 #include <SFML/Graphics.hpp>
 using namespace sf;
 
+enum Level { LEVEL_ONE, LEVEL_TWO, LEVEL_THREE, END };
+
 class UI
 {
 private:
@@ -55,30 +57,58 @@ public:
 	{
 		win.draw(background);
 	}
-	void drawTitlePage(RenderWindow &win)
+	void drawTitlePage(RenderWindow &win, Level level)
 	{
 		win.draw(startBtn);
 		win.draw(quitBtn);
+		string startOrContinue;
+
+		if (level == LEVEL_ONE)
+		{
+			startOrContinue = "START GAME";
+		}
+		else 
+		{
+			startOrContinue = "CONTINUE";
+		}
 
 		Text title("SPACE INVADERS", font, 55);
 		title.setPosition(150, 100);
 		title.setFillColor(Color::Yellow);
 		win.draw(title);
 
-		Text startColor("START GAME", font, 35);	// prints text
+		Text startColor(startOrContinue, font, 35);	// prints text
 		startColor.setPosition(262, 204);
 		startColor.setFillColor(Color::White);
 		win.draw(startColor);
 
+		drawQuit(win);
+	}
+	void drawQuit(RenderWindow &win)
+	{
 		Text quitColor("QUIT", font, 25);
 		quitColor.setPosition(347, 275);
 		quitColor.setFillColor(Color::White);
 		win.draw(quitColor);
 	}
-	void drawLabels(RenderWindow &win, int &livesLeft, int &aliensHit, string level)
+	void drawLabels(RenderWindow &win, int &livesLeft, int aliensHit, Level level)
 	{
 		string numLives = to_string(livesLeft);
 		string numAliens = to_string(aliensHit);
+		string levelName;
+
+		if (level == LEVEL_ONE)
+		{
+			levelName = "LEVEL ONE";
+		}
+		else if (level == LEVEL_TWO)
+		{
+			levelName = "LEVEL TWO";
+		}
+		else if (level == LEVEL_THREE)
+		{
+			levelName = "LEVEL THREE";
+		}
 
 		Text displayLivesLeft("Lives Left: ", font, 15);
 		displayLivesLeft.setPosition(15, 15);
@@ -100,13 +130,21 @@ public:
 		numberOfAliens.setFillColor(Color::White);
 		win.draw(numberOfAliens);
 
-		Text displayLevel(level , font, 18);
+		Text displayLevel(levelName, font, 18);
 		displayLevel.setPosition(350, 15);
 		displayLevel.setFillColor(Color::Yellow);
 		win.draw(displayLevel);
 	}
-	void drawEndOfLevel(RenderWindow &win, bool aliensWon)
+	void drawEndOfGame(RenderWindow &win, bool aliensWon)
 	{
+		Text gameOver("GAME OVER", font, 55);
+		gameOver.setPosition(150, 100);
+		gameOver.setFillColor(Color::Yellow);
+		win.draw(gameOver);
+
+		win.draw(quitBtn);
+		drawQuit(win);
+
 		string winner;
 		if (aliensWon)
 		{
@@ -126,6 +164,13 @@ public:
 		whoTheWinnerIs.setPosition(200, 375);
 		whoTheWinnerIs.setFillColor(Color::Yellow);
 		win.draw(whoTheWinnerIs);
+	}
+	void drawEndOfLevel(RenderWindow &win)
+	{
+		Text continueNext("continue to next level...", font, 30);
+		continueNext.setPosition(275, 325);
+		continueNext.setFillColor(Color::Yellow);
+		win.draw(continueNext);
 	}
 	//==================================================
 	// this exits the program if the font does not load

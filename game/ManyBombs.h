@@ -11,6 +11,7 @@ class ManyBombs
 private:
 	list<Bomb> manyBombs;
 	Texture bombTexture;
+	Texture loanTexture;
 public:
 	ManyBombs()
 	{
@@ -19,21 +20,27 @@ public:
 			cout << "Unable to load bomb texture!" << endl;
 			exit(EXIT_FAILURE);
 		}
+		if (!loanTexture.loadFromFile("loans.bmp"))
+		{
+			cout << "Unable to load loan texture!" << endl;
+			exit(EXIT_FAILURE);
+		}
 	}
-	void randomAlienDrop(Vector2f pos)		// this adds a bomb to the list
+	void randomAlienDrop(Vector2f pos, int level)		// this adds a bomb to the list
 	{
 		Bomb temp(bombTexture);
+		if (level == 1)
+		{
+			temp.setScale(1, 1);
+		}
+		else if (level == 2)
+		{
+			temp.setScale(1.2, 1.2);
+			temp.setDifferentTexture(loanTexture);
+		}
 		temp.setPositionByEnemy(Vector2f(pos.x + 5, pos.y - 5));
 		manyBombs.push_back(temp);
 		cout << "a bomb is being added" << endl;
-	}
-	void resetScale(float x, float y)
-	{
-		list<Bomb>::iterator tempBomb;
-		for (tempBomb = manyBombs.begin(); tempBomb != manyBombs.end(); tempBomb++)
-		{
-			tempBomb->setScale(x, y);
-		}
 	}
 	bool deleteBomb(Sprite ship, int &livesLeft)
 	{
@@ -95,5 +102,9 @@ public:
 			isShipDead = false;
 		}
 		return isShipDead;
+	}
+	void clearBombList()
+	{
+		manyBombs.clear();
 	}
 };

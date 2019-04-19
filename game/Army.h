@@ -13,12 +13,24 @@ class Army
 private:
 	list<Enemy> army;	//creates a linked list of enemies
 	Texture enemyTexture;
+	Texture badderTexture;
+	Texture ocTexture;
 public:
 	Army(Vector2f pos)
 	{
 		if (!enemyTexture.loadFromFile("enemy.bmp"))
 		{
 			cout << "Unable to load enemy texture!" << endl;
+			exit(EXIT_FAILURE);
+		}
+		if (!badderTexture.loadFromFile("BadderEnemy.bmp"))
+		{
+			cout << "Unable to load badder enemy texture!" << endl;
+			exit(EXIT_FAILURE);
+		}
+		if (!ocTexture.loadFromFile("OC.bmp"))
+		{
+			cout << "Unable to load OC texture!" << endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -52,7 +64,22 @@ public:
 			tempPos.x = tempEnemy->getXPosition();
 			tempEnemy->setDifferentPosition(tempPos);
 		}
+	}
+	void resetTexture(int level)
+	{
+		list<Enemy>::iterator tempEnemy;
+		for (tempEnemy = army.begin(); tempEnemy != army.end(); tempEnemy++)
+		{
+			if (level == 1)
+			{
+				tempEnemy->setDifferentTexture(badderTexture);
+			}
+			else if (level == 2)
+			{
+				tempEnemy->setDifferentTexture(ocTexture);
+			}
 
+		}
 	}
 	void setSpeed(float speed)
 	{
@@ -93,12 +120,10 @@ public:
 	{
 		list<Enemy>::iterator temp;
 		temp = army.begin();
-
 		int random = rand() % army.size();
-
 		advance(temp, random);
-
 		return temp->returnEnemySprite().getPosition();
+		// you have to get a sprite returned because enemy class isn;t just a sprite
 	}
 	bool hasArmyReachedEnemy(Sprite ship, int &livesLeft)
 	{
@@ -108,12 +133,27 @@ public:
 
 		for (tempEnemy = army.begin(); tempEnemy != army.end() && !hasArmyReachedEnemy; tempEnemy++)
 		{
-			if (tempEnemy->reachedShip(shipBounds))
+			if (tempEnemy->reachedShip(ship.getPosition()))
 			{
 				hasArmyReachedEnemy = true;
 				livesLeft--;
 			}
 		}
 		return hasArmyReachedEnemy;
+	}
+	int returnEnemiesHit() const
+	{
+		return (12 - army.size());
+	}
+	void setNewLevel(int level)
+	{
+		army.clear();
+		resetArmy(Vector2f(100, 40));
+		setSpeed(0.75f);
+		resetTexture(level);
+	}
+	void clearArmyList()
+	{
+		army.clear();
 	}
 };

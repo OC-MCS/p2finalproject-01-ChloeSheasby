@@ -14,6 +14,14 @@ public:
 	{
 		missile.setTexture(texture);
 	}
+	void setDifferentTexture(Texture &texture)
+	{
+		missile.setTexture(texture);
+	}
+	void setDifferentScale(float x, float y)
+	{
+		missile.setScale(x, y);
+	}
 	void setPositionByShip(Vector2f pos)
 	{
 		missile.setPosition(pos);

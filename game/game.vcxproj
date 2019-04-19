@@ -162,9 +162,13 @@
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="BadderEnemy.bmp" />
     <Image Include="bomb.bmp" />
     <Image Include="enemy.bmp" />
+    <Image Include="loans.bmp" />
     <Image Include="missile.png" />
+    <Image Include="money.bmp" />
+    <Image Include="OC.bmp" />
     <Image Include="ship.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
