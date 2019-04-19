@@ -69,7 +69,7 @@ public:
 	//================================
 	// this returns the enemy sprite
 	//================================
-	Sprite returnEnemySprite()
+	Sprite returnEnemySprite() const
 	{
 		return enemy;
 	}
