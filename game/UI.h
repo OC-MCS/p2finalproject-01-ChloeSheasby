@@ -4,16 +4,21 @@ using namespace std;
 #include <SFML/Graphics.hpp>
 using namespace sf;
 
+// this enum helps handle the different level/game states
 enum Level { LEVEL_ONE, LEVEL_TWO, LEVEL_THREE, END };
 
 class UI
 {
 private:
-	Sprite background;
-	Texture starsTexture;
-	RectangleShape startBtn, quitBtn; // continueBtn;
-	Font font;
+	Sprite background;	// holds the sprite for the background
+	Texture starsTexture;	// holds the background texture
+	RectangleShape startBtn, quitBtn;	// holds the buttons for starting or quitting
+	Font font;	// holds the font
 public:
+	//===========================================================================
+	// this constructor loads the textures and initializes the background and 
+	// buttons
+	//===========================================================================
 	UI()
 	{
 		if (!font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf"))	// loads the font
@@ -28,7 +33,8 @@ public:
 		// The texture file is 640x480, so scale it up a little to cover 800x600 window
 		background.setScale(1.5, 1.5);
 		
-		startBtn.setPosition(Vector2f(250, 200));	// sets the button in the middle of the screen
+		// initializes the buttons
+		startBtn.setPosition(Vector2f(250, 200));	
 		startBtn.setOutlineColor(Color::Transparent);
 		startBtn.setOutlineThickness(2);
 		startBtn.setSize(Vector2f(250, 50));
@@ -40,9 +46,14 @@ public:
 		quitBtn.setSize(Vector2f(75, 30));
 		quitBtn.setFillColor(Color::Transparent);
 	}
+
+	//===========================================================================
+	// this function handles if the mouse clicks inside the buttons and returns
+	// a bool as needed
+	//===========================================================================
 	bool handleStartClicked(Vector2f mouse)
 	{
-		bool start = false;
+		bool start = false;	
 		if (startBtn.getGlobalBounds().contains(mouse))
 		{
 			start = true;
@@ -53,10 +64,18 @@ public:
 		}
 		return start;
 	}
+
+	//=======================
+	// draws the background
+	//=======================
 	void drawBackground(RenderWindow &win)
 	{
 		win.draw(background);
 	}
+
+	//===========================================================================
+	// draws the title page with the buttons and title depending on the level
+	//===========================================================================
 	void drawTitlePage(RenderWindow &win, Level level)
 	{
 		win.draw(startBtn);
@@ -77,13 +96,17 @@ public:
 		title.setFillColor(Color::Yellow);
 		win.draw(title);
 
-		Text startColor(startOrContinue, font, 35);	// prints text
+		Text startColor(startOrContinue, font, 35);
 		startColor.setPosition(262, 204);
 		startColor.setFillColor(Color::White);
 		win.draw(startColor);
 
 		drawQuit(win);
 	}
+
+	//============================
+	// this draws the quit button
+	//============================
 	void drawQuit(RenderWindow &win)
 	{
 		Text quitColor("QUIT", font, 25);
@@ -91,9 +114,14 @@ public:
 		quitColor.setFillColor(Color::White);
 		win.draw(quitColor);
 	}
+
+	//===========================================================================
+	// this draws the labels on the game window and displays the lives left
+	// and the number of aliens hit
+	//===========================================================================
 	void drawLabels(RenderWindow &win, int &livesLeft, int aliensHit, Level level)
 	{
-		string numLives = to_string(livesLeft);
+		string numLives = to_string(livesLeft);		// this changes the number into a string
 		string numAliens = to_string(aliensHit);
 		string levelName;
 
@@ -135,11 +163,15 @@ public:
 		displayLevel.setFillColor(Color::Yellow);
 		win.draw(displayLevel);
 	}
+
+	//===============================================
+	// draws the game over sign and the quit button
+	//===============================================
 	void drawEndOfGame(RenderWindow &win, bool aliensWon)
 	{
-		Text gameOver("GAME OVER", font, 55);
-		gameOver.setPosition(150, 100);
-		gameOver.setFillColor(Color::Yellow);
+		Text gameOver("GAME OVER", font, 100);
+		gameOver.setPosition(100, 50);
+		gameOver.setFillColor(Color::Red);
 		win.draw(gameOver);
 
 		win.draw(quitBtn);
@@ -165,6 +197,10 @@ public:
 		whoTheWinnerIs.setFillColor(Color::Yellow);
 		win.draw(whoTheWinnerIs);
 	}
+
+	//===========================================================================
+	// draw the end of the level if there is another level to play
+	//===========================================================================
 	void drawEndOfLevel(RenderWindow &win)
 	{
 		Text continueNext("continue to next level...", font, 30);
@@ -172,6 +208,7 @@ public:
 		continueNext.setFillColor(Color::Yellow);
 		win.draw(continueNext);
 	}
+
 	//==================================================
 	// this exits the program if the font does not load
 	//==================================================

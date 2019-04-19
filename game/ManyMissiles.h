@@ -10,9 +10,12 @@ class ManyMissiles
 {
 private:
 	list<Missile> manyMissiles;	// creates a list of missile
-	Texture missileTexture;
-	Texture moneyTexture;
+	Texture missileTexture;		// holds the texture for the missile
+	Texture moneyTexture;		// holds the texture for the special third level
 public:
+	//=================================================
+	// this constructor simply loads all the textures 
+	//=================================================
 	ManyMissiles()
 	{
 		if (!missileTexture.loadFromFile("missile.png"))
@@ -26,10 +29,16 @@ public:
 			exit(EXIT_FAILURE);
 		}
 	}
-	void addMissileToGroup(Vector2f pos, int level)	// this simply adds a missile to the group of missiles
+
+	//===========================================================================
+	// this adds a missile to the group of missiles
+	// one of its parameters is the level, which helps it change certain things
+	// if it is the third level
+	//===========================================================================
+	void addMissileToGroup(Vector2f pos, int level)	
 	{
 		Missile temp(missileTexture);
-		if (level == 2)
+		if (level == 2)		// if it is level three
 		{
 			temp.setDifferentScale(3, 3);
 			temp.setDifferentTexture(moneyTexture);
@@ -37,7 +46,15 @@ public:
 		temp.setPositionByShip(pos);
 		manyMissiles.push_back(temp);
 	}
-	void deleteMissileAndEnemy(list<Enemy> &army)	// delete once the missile is a hit
+
+	//===========================================================================
+	// this cycles through the list of enemies and deletes the enemy if it is 
+	// hit by a missile
+	// it also calls a function in Enemy.h that cycles through each missile and 
+	// deletes missiles if any of them hit one of the enemies
+	// it then returns a boolean if the alien is hit or not
+	//===========================================================================
+	void deleteMissileAndEnemy(list<Enemy> &army)	
 	{
 		bool alienIsHit = false;
 		list<Enemy>::iterator armyTemp;
@@ -55,6 +72,11 @@ public:
 			}
 		}
 	}
+
+	//===========================================================================
+	// this moves the missiles and also tests if the missiles go offscreen
+	// if they do go offscreen, they are deleted
+	//===========================================================================
 	void moveMissiles()
 	{
 		list<Missile>::iterator temp;
@@ -74,6 +96,10 @@ public:
 			}
 		}
 	}
+
+	//=============================================
+	// this draws all of the missiles in the list
+	//=============================================
 	void drawManyMissiles(RenderWindow &win)
 	{
 		list<Missile>::iterator temp;
@@ -82,6 +108,10 @@ public:
 			win.draw(temp->returnMissileSprite());
 		}
 	}
+
+	//============================================================================
+	// this checks if all of the aliens are dead and returns a boolean accordingly
+	//===========================================================================
 	bool areAllAliensDead(int count)
 	{
 		bool areAllAliensDead = false;
@@ -95,6 +125,10 @@ public:
 		}
 		return areAllAliensDead;
 	}
+
+	//=========================================
+	// this simply clears the list of missiles
+	//=========================================
 	void clearMissileList()
 	{
 		manyMissiles.clear();

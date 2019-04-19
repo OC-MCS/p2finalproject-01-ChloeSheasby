@@ -35,7 +35,7 @@ int main()
 	const int WINDOW_WIDTH = 800;		// the size of the window
 	const int WINDOW_HEIGHT = 600;
 	const int MIN_SECONDS = 60;			// helps with making a bomb drop randomly
-	const int MAX_SECONDS = 300;
+	const int MAX_SECONDS = 180;
 
 	unsigned seed = time(0);			// also helps with making a bomb drop randomly
 	srand(seed);
@@ -49,40 +49,17 @@ int main()
 	float shipX = window.getSize().x / 2.0f;
 	float shipY = 500;
 
-	// this is here so that I can test a single enemy if wanted
-	Texture enemyTexture;
-	if (!enemyTexture.loadFromFile("enemy.bmp"))
-	{
-		cout << "Unable to load enemy texture!" << endl;
-		exit(EXIT_FAILURE);
-	}
-	Texture missileTexture;
-	if (!missileTexture.loadFromFile("missile.png"))
-	{
-		cout << "Unable to load missile texture!" << endl;
-		exit(EXIT_FAILURE);
-	}
-	Texture bombTexture;
-	if (!bombTexture.loadFromFile("bomb.bmp"))
-	{
-		cout << "Unable to load bomb texture!" << endl;
-		exit(EXIT_FAILURE);
-	}
+	Ship ship(Vector2f(shipX, shipY));	// creates the ship with the coordinates from above
+	Army army(Vector2f(100, 40));		// creates the army with hard-coded coordinates
+	UI title;							// creates a UI so different titles can be printed accordingly
+	ManyMissiles manyMissiles;			// creates the group of missiles
+	ManyBombs manyBombs;				// creates the group of bombs
 
-	Ship ship(Vector2f(shipX, shipY));
-	Army army(Vector2f(100, 40));
-	UI title;
-	ManyMissiles manyMissiles;
-	ManyBombs manyBombs;
-
-
-	bool start = false;
-	int livesLeft = 3;		// sets the initial amount of lives for the player
-	bool aliensWon = false;
-	bool mouseClicked = false;
-	Level level = LEVEL_ONE;
-	int randomSecond = 0;
-
+	bool start = false;			// this flag gets changed based on if the start button is pressed or not
+	int livesLeft = 3;			// sets the initial amount of lives for the player
+	bool aliensWon = false;		// based on if the aliens won or not
+	Level level = LEVEL_ONE;	// initializes an enum as the first value, which corresponds to the first level
+	int randomSecond = 0;		// this helps in dropping bombs regularly
 
 	while (window.isOpen())
 	{
@@ -90,8 +67,7 @@ int main()
 		// For now, we just need this so we can click on the window and close it
 		Event event;
 
-		// draw background first, so everything that's drawn later 
-		// will appear on top of background
+		// draw background first, so everything that's drawn later will appear on top of background
 		title.drawBackground(window);
 
 		while (window.pollEvent(event))
@@ -103,8 +79,9 @@ int main()
 			{
 				if (event.key.code == Keyboard::Space)
 				{
+					// initializes the missile when created based on the position of the ship
 					Vector2f pos = ship.returnPosition();
-					//missile.setPositionByShip(Vector2f(pos.x + 5, pos.y - 5));
+					// adds a missile to the group of missile
 					manyMissiles.addMissileToGroup(Vector2f(pos.x + 5, pos.y - 5), level);
 					cout << "Adding a missile to the missile group." << endl;
 				}
@@ -114,12 +91,16 @@ int main()
 				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
 				if (level != END)
 				{
+					// changes the start boolean based on if the mouse clicks the separate buttons
 					start = title.handleStartClicked(mousePos);
 				}
 				else
 				{
+					// if it is the end of the game, start is automatically false so that the game must be exited
 					start = false;
 				}
+
+				// if start is false, that means that the quit button was pressed and the program must be exited 
 				if (!start)
 				{
 					exit(-1);
@@ -137,11 +118,15 @@ int main()
 		{
 			if (level == END)
 			{
+				// draws game over if the game is completely finished
 				title.drawEndOfGame(window, aliensWon);
 			}
 			else
 			{
+				// the title is drawn with the start/continue and quit buttons
 				title.drawTitlePage(window, level);
+
+				// if the player can continue with another level, a different message is displayed
 				if (level == LEVEL_TWO || level == LEVEL_THREE)
 				{
 					title.drawEndOfLevel(window);
@@ -150,64 +135,75 @@ int main()
 		}
 		else
 		{
+			// if the start button has been pressed, then the actual game is displayed
+			// labels are drawn for the hit & life counters
 			title.drawLabels(window, livesLeft, army.returnEnemiesHit(), level);
+
 			ship.moveShip();
-	
 			ship.drawShip(window);
 
+			// if the ship is hit once or the army reaches the ship, then these functions return true
+			// delete bomb deletes a bomb if it hits the ship
 			if (manyBombs.deleteBomb(ship.returnShipSprite(), livesLeft)
-				|| army.hasArmyReachedEnemy(ship.returnShipSprite(), livesLeft) || army.moveArmy(livesLeft))
-				// delete bomb returns true if the ship is hit once
+				|| army.hasArmyReachedShip(ship.returnShipSprite(), livesLeft))
 			{
-				// restart the level && move enemies to the top of the screen again
+				// moves enemies to the top of the screen again 
+				// and resets the ship's position if the ship is hit once
 				army.resetPosition(40);
-				// reset ship's position
 				ship.resetPosition(Vector2f(shipX, shipY));
 			}
-		
+			
+			army.moveArmy();
 			army.drawArmy(window);
 	
-			// this drops a bomb every 1 to 5 seconds 
+			// handles randomly dropping a bomb 
 			if (randomSecond == 0)
 			{
+				// if the random second is 0 then manyBombs will drop a random bomb with the position of a random alien
 				manyBombs.randomAlienDrop(army.returnRandomEnemyPosition(), level);
+
+				// level three is special because bombs are dropped significantly closer together
+				// than the other two "normal" levels
 				if (level == LEVEL_THREE)
 				{
+					// this generates a new random second
 					randomSecond = (rand() % 5) + 1;
 				}
 				else
 				{
+					// this generates a new random second that is within a reasonable range
 					randomSecond = (rand() % (MAX_SECONDS - MIN_SECONDS + 1)) + MIN_SECONDS;
 				}
 			}
 			else
 			{
+				// if the random second is not 0, then it decrements until it hits 0 and only drops a bomb then
 				randomSecond--;
 			}
 
-			manyBombs.moveBombs();
+			manyBombs.moveBombs();		// also deletes bombs if they move offscreen
 			manyBombs.drawBombs(window);
 		
-			manyMissiles.moveMissiles();
+			manyMissiles.moveMissiles();	// also deletes missiles if they move offscreen
 			manyMissiles.drawManyMissiles(window);
-			manyMissiles.deleteMissileAndEnemy(army.returnArmyList()); 
+			manyMissiles.deleteMissileAndEnemy(army.returnArmyList()); // deletes the missiles and enemies if they collide
 		}
 
-		if (manyBombs.isShipDead(livesLeft))
+		// checks if ship is dead and if so, then the game is over and the aliens win
+		if (manyBombs.isShipDead(livesLeft))	
 		{
 			aliensWon = true;
-			start = false;	// redraws the starting page
-			livesLeft = 3;
-			level = END;
-			// if just one bomb hits the ship, the level needs to start over
+			start = false;	// redraws the starting page and allows the player to press quit
+			level = END;	// sets the state of the game to game over
 		}
 
+		// checks if all the aliens are dead and if so, then the game is over and the player wins
 		if (manyMissiles.areAllAliensDead(army.returnEnemiesHit()))
 		{
-			aliensWon = false;
+			aliensWon = false;		// this says that the player has won
 			if (level == LEVEL_ONE)
 			{
-				level = LEVEL_TWO;
+				level = LEVEL_TWO;		// moves the level to the next one
 			}
 			else if (level == LEVEL_TWO)
 			{
@@ -215,15 +211,14 @@ int main()
 			}
 			else if (level == LEVEL_THREE)
 			{
-				level = END;
-			}
-			start = false;
+				level = END;	// moves the state of the game to game over
+			}	
+			start = false;	// resets start so that the buttons can be used again
 
-			army.setNewLevel(level);
-			manyBombs.clearBombList();
-			manyMissiles.clearMissileList();
-			ship.resetPosition(Vector2f(shipX, shipY));
-			// the next level should start
+			army.setNewLevel(level);	// sets the new level based on which level it is
+			manyBombs.clearBombList();	// clears the list of bombs
+			manyMissiles.clearMissileList();	// clears the list of missiles
+			ship.resetPosition(Vector2f(shipX, shipY));	// resets the ships position
 		}
 
 		// end the current frame; this makes everything that we have 
@@ -239,4 +234,3 @@ int main()
 
 	return 0;
 }
-

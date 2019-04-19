@@ -7,9 +7,12 @@ using namespace sf;
 class Ship
 {
 private:
-	Sprite ship;	
-	Texture shipTexture;
+	Sprite ship;		// holds the ship's sprite
+	Texture shipTexture;	// holds the ship's texture
 public:
+	//===========================================================================
+	// this constructor takes a position as a parameter and initializes the ship
+	//===========================================================================
 	Ship(Vector2f pos)
 	{
 		if (!shipTexture.loadFromFile("ship.png"))
@@ -17,10 +20,14 @@ public:
 			cout << "Unable to load ship texture!" << endl;
 			exit(EXIT_FAILURE);
 		}
-		ship.setTexture(shipTexture);
+		ship.setTexture(shipTexture);	// sets texture
 
-		ship.setPosition(pos);
+		ship.setPosition(pos);			// sets position
 	}
+
+	//============================================
+	// this handles moving the ship left to right
+	//============================================
 	void moveShip()
 	{
 		const float DISTANCE = 5.0;
@@ -37,18 +44,34 @@ public:
 			ship.move(DISTANCE, 0);
 		}
 	}
+
+	//=====================================================
+	// this is just a wrapper function that draws the ship
+	//=====================================================
 	void drawShip(RenderWindow &win)
 	{
 		win.draw(ship);
 	}
+
+	//================================
+	// this resets the ships position
+	//================================
 	void resetPosition(Vector2f pos)
 	{
 		ship.setPosition(pos);
 	}
+
+	//============================
+	// returns the ship's position
+	//============================
 	Vector2f returnPosition() const
 	{
 		return ship.getPosition();
 	}
+
+	//===========================
+	// returns the ship's sprite
+	//===========================
 	Sprite returnShipSprite() const
 	{
 		return ship;
