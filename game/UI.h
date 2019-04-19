@@ -92,12 +92,16 @@ public:
 		}
 
 		Text title("SPACE INVADERS", font, 55);
-		title.setPosition(150, 100);
+		title.setPosition(170, 80);
 		title.setFillColor(Color::Yellow);
 		win.draw(title);
 
 		Text startColor(startOrContinue, font, 35);
-		startColor.setPosition(262, 204);
+		startColor.setPosition(290, 204);
+		if (startOrContinue == "CONTINUE")
+		{
+			startColor.setPosition(305, 204);
+		}
 		startColor.setFillColor(Color::White);
 		win.draw(startColor);
 
@@ -110,7 +114,7 @@ public:
 	void drawQuit(RenderWindow &win)
 	{
 		Text quitColor("QUIT", font, 25);
-		quitColor.setPosition(347, 275);
+		quitColor.setPosition(375, 275);
 		quitColor.setFillColor(Color::White);
 		win.draw(quitColor);
 	}
@@ -188,12 +192,12 @@ public:
 		}
 
 		Text displayWinner("WINNER", font, 55);
-		displayWinner.setPosition(275, 325);
+		displayWinner.setPosition(295, 325);
 		displayWinner.setFillColor(Color::Yellow);
 		win.draw(displayWinner);
 
 		Text whoTheWinnerIs(winner, font, 100);
-		whoTheWinnerIs.setPosition(200, 375);
+		whoTheWinnerIs.setPosition(235, 375);
 		whoTheWinnerIs.setFillColor(Color::Yellow);
 		win.draw(whoTheWinnerIs);
 	}
@@ -204,7 +208,7 @@ public:
 	void drawEndOfLevel(RenderWindow &win)
 	{
 		Text continueNext("continue to next level...", font, 30);
-		continueNext.setPosition(275, 325);
+		continueNext.setPosition(250, 150);
 		continueNext.setFillColor(Color::Yellow);
 		win.draw(continueNext);
 	}

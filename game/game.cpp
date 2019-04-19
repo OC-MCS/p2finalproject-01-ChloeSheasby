@@ -99,7 +99,6 @@ int main()
 					// if it is the end of the game, start is automatically false so that the game must be exited
 					start = false;
 				}
-
 				// if start is false, that means that the quit button was pressed and the program must be exited 
 				if (!start)
 				{
